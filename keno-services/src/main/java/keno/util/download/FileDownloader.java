@@ -1,4 +1,4 @@
-package keno.util;
+package keno.util.download;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;

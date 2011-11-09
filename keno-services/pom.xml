@@ -5,8 +5,8 @@
     <groupId>keno</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>keno-util</groupId>
-  <artifactId>keno-util</artifactId>
+  <groupId>keno</groupId>
+  <artifactId>keno-services</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <dependencies>
   	<dependency>

@@ -27,7 +27,7 @@
   	</dependency>
   </dependencies>
   <modules>
-  	<module>keno-util</module>
-  	<module>keno-main</module>
+  	<module>keno-services</module>
+  	<module>keno-gui</module>
   </modules>
 </project>

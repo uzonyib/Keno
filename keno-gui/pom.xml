@@ -6,7 +6,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>keno</groupId>
-  <artifactId>keno-main</artifactId>
+  <artifactId>keno-gui</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <build>
   	<plugins>
@@ -17,7 +17,7 @@
   			<configuration>
 	  			<archive>
 		            <manifest>
-		            	<mainClass>keno.main.KenoApp</mainClass>
+		            	<mainClass>keno.KenoApp</mainClass>
 		            </manifest>
 	          	</archive>
 	          	<descriptorRefs>
@@ -38,8 +38,8 @@
   </build>
   <dependencies>
   	<dependency>
-  		<groupId>keno-util</groupId>
-  		<artifactId>keno-util</artifactId>
+  		<groupId>keno</groupId>
+  		<artifactId>keno-services</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   		<type>jar</type>
   		<scope>compile</scope>

@@ -1,8 +1,9 @@
-package keno.view;
+package keno.gui;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -14,14 +15,18 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-import keno.main.KenoApp;
-import keno.util.FileDownloader;
+import keno.util.download.FileDownloader;
 
 import org.apache.log4j.Logger;
 
 public class MainWindow {
 	
 	private static final Logger LOGGER = Logger.getLogger(MainWindow.class);
+	
+	// TODO should be moved to property file
+	public static final String DB_FILE_URL = "http://www.szerencsejatek.hu/xls/keno.csv";
+	public static final String DB_FILE_LOCATION = System.getProperty("user.home")
+			+ File.separator + "keno.csv";
 	
 	public MainWindow() {
 		init();
@@ -41,8 +46,10 @@ public class MainWindow {
 		fileMenu.add(refreshMenuItem);
 
 		refreshMenuItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						final JDialog progressWindow = new JDialog(mainFrame, true);
 						progressWindow.setTitle("Letöltés");
@@ -56,6 +63,7 @@ public class MainWindow {
 						progressWindow.add(statusLabel);
 						JButton okButton = new JButton("OK");
 						okButton.addActionListener(new ActionListener() {
+							@Override
 							public void actionPerformed(ActionEvent e) {
 								progressWindow.setVisible(false);
 							}
@@ -66,11 +74,12 @@ public class MainWindow {
 							new SwingWorker<Boolean, Void>() {
 								@Override
 								protected Boolean doInBackground() throws Exception {
-									return new FileDownloader(KenoApp.DB_FILE_URL, KenoApp.DB_FILE_LOCATION).download();
+									return new FileDownloader(DB_FILE_URL, DB_FILE_LOCATION).download();
 								}
 								@Override
 								protected void done() {
 									SwingUtilities.invokeLater(new Runnable() {
+										@Override
 										public void run() {
 											statusLabel.setText("Kész.");
 										}

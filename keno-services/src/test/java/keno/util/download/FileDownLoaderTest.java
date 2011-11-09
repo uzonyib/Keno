@@ -1,4 +1,4 @@
-package keno.util;
+package keno.util.download;
 
 import static org.junit.Assert.*;
 
