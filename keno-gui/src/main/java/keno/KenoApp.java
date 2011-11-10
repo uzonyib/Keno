@@ -15,7 +15,7 @@ public class KenoApp {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new MainWindow();
+				new MainWindow("/keno.properties");
 			}
 		});
 	}

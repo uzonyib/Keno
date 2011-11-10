@@ -4,6 +4,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -23,16 +26,38 @@ public class MainWindow {
 	
 	private static final Logger LOGGER = Logger.getLogger(MainWindow.class);
 	
-	// TODO should be moved to property file
-	public static final String DB_FILE_URL = "http://www.szerencsejatek.hu/xls/keno.csv";
-	public static final String DB_FILE_LOCATION = System.getProperty("user.home")
-			+ File.separator + "keno.csv";
+	private Properties properties;
 	
-	public MainWindow() {
-		init();
+	private static final String CSV_URL_PROP = "keno.csv";
+	private static final String WORK_DIR_PROP = "keno.workdir";
+	private static final String LOCAL_FILE_PROP = "keno.localfile";
+	
+	public MainWindow(String propertyFile) {
+		initProperties(propertyFile);
+		initGui();
 	}
 
-	private void init() {
+	private void initProperties(String propertyFile) {
+		InputStream propInputSream = null;
+		try {
+			propInputSream = getClass().getResourceAsStream(propertyFile);
+			this.properties = new Properties();
+			this.properties.load(propInputSream);
+		} catch (IOException e) {
+			LOGGER.error("Error loading properties.", e);
+			throw new IllegalArgumentException(propertyFile, e);
+		} finally {
+			try {
+				if (propInputSream != null) {
+					propInputSream.close();
+				}
+			} catch (IOException e) {
+				
+			}
+		}
+	}
+
+	private void initGui() {
 		final JFrame mainFrame = new JFrame("Keno Application");
 		mainFrame.setSize(640, 480);
 		mainFrame.setLocation(100, 100);
@@ -74,7 +99,11 @@ public class MainWindow {
 							new SwingWorker<Boolean, Void>() {
 								@Override
 								protected Boolean doInBackground() throws Exception {
-									return new FileDownloader(DB_FILE_URL, DB_FILE_LOCATION).download();
+									return new FileDownloader(properties.getProperty(CSV_URL_PROP),
+											properties.getProperty(WORK_DIR_PROP)
+											+ File.separator
+											+ properties.getProperty(LOCAL_FILE_PROP))
+									.download();
 								}
 								@Override
 								protected void done() {
