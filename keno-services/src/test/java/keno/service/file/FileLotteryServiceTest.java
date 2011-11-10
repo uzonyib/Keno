@@ -22,7 +22,7 @@ public class FileLotteryServiceTest {
 	
 	@Before
 	public void init() throws FileNotFoundException {
-		this.service = new FileLotteryService(getClass().getResource("/test.csv").getFile());
+		this.service = new FileLotteryService(getClass().getResource("/keno-test.csv").getFile());
 	}
 	
 	@Test
@@ -67,22 +67,22 @@ public class FileLotteryServiceTest {
 		assertEquals(6, draw.getDay());
 		assertEquals("2011-11-05", dateFormat.format(draw.getDate()));
 		assertArrayEquals(new byte[] {
-				4, 7, 10, 13, 15,
-				16, 17, 19, 22, 28,
-				36, 38, 39, 44, 50,
-				51, 52, 55, 59, 67 },
+				7, 9, 10, 12, 14,
+				22, 27, 28, 37, 39,
+				40, 44, 49, 60, 61,
+				63, 65, 66, 73, 79 },
 				draw.getNumbers());
 		
-		draws = service.listMostRecentDraws(5);
-		assertEquals(3, draws.size());
+		draws = service.listMostRecentDraws(15);
+		assertEquals(10, draws.size());
 	}
 	
 	@Test
 	public void testListDraws() {
 		List<Draw> draws = service.listDraws();
 		assertNotNull(draws);
-		assertEquals(3, draws.size());
-		for (int i = 0; i < 3; ++i) {
+		assertEquals(10, draws.size());
+		for (int i = 0; i < 10; ++i) {
 			assertNotNull(draws.get(i));
 		}
 	}

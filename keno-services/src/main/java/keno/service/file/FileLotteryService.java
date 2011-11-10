@@ -21,7 +21,6 @@ public class FileLotteryService implements LotteryService {
 
 	public FileLotteryService(String sourcePath) throws FileNotFoundException {
 		this.source = new File(sourcePath);
-		System.out.println(source.getAbsolutePath());
 		if (!source.exists() || !source.isFile()) {
 			LOGGER.warn("File not found: " + sourcePath);
 			throw new FileNotFoundException("File not found: " + sourcePath);
