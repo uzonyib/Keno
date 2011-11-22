@@ -3,10 +3,6 @@ package keno.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -18,6 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import keno.KenoApp;
 import keno.util.download.FileDownloader;
 
 import org.apache.log4j.Logger;
@@ -26,35 +23,8 @@ public class MainWindow {
 	
 	private static final Logger LOGGER = Logger.getLogger(MainWindow.class);
 	
-	private Properties properties;
-	
-	private static final String CSV_URL_PROP = "keno.csv";
-	private static final String WORK_DIR_PROP = "keno.workdir";
-	private static final String LOCAL_FILE_PROP = "keno.localfile";
-	
-	public MainWindow(String propertyFile) {
-		initProperties(propertyFile);
+	public MainWindow() {
 		initGui();
-	}
-
-	private void initProperties(String propertyFile) {
-		InputStream propInputSream = null;
-		try {
-			propInputSream = getClass().getResourceAsStream(propertyFile);
-			this.properties = new Properties();
-			this.properties.load(propInputSream);
-		} catch (IOException e) {
-			LOGGER.error("Error loading properties.", e);
-			throw new IllegalArgumentException(propertyFile, e);
-		} finally {
-			try {
-				if (propInputSream != null) {
-					propInputSream.close();
-				}
-			} catch (IOException e) {
-				
-			}
-		}
 	}
 
 	private void initGui() {
@@ -99,11 +69,8 @@ public class MainWindow {
 							new SwingWorker<Boolean, Void>() {
 								@Override
 								protected Boolean doInBackground() throws Exception {
-									return new FileDownloader(properties.getProperty(CSV_URL_PROP),
-											properties.getProperty(WORK_DIR_PROP)
-											+ File.separator
-											+ properties.getProperty(LOCAL_FILE_PROP))
-									.download();
+									return new FileDownloader(KenoApp.INSTANCE.getSourceUrl(),
+											KenoApp.INSTANCE.getLotteryFile()).download();
 								}
 								@Override
 								protected void done() {
