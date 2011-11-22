@@ -1,17 +1,16 @@
 package keno.service.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import keno.model.Draw;
 import keno.service.LotteryService;
 import keno.util.parser.DrawFileReader;
+
+import org.apache.log4j.Logger;
 
 public class FileLotteryService implements LotteryService {
 
@@ -19,16 +18,8 @@ public class FileLotteryService implements LotteryService {
 	
 	private File source;
 
-	public FileLotteryService(String sourcePath) throws FileNotFoundException {
+	public FileLotteryService(String sourcePath) {
 		this.source = new File(sourcePath);
-		if (!source.exists() || !source.isFile()) {
-			LOGGER.warn("File not found: " + sourcePath);
-			throw new FileNotFoundException("File not found: " + sourcePath);
-		}
-		if (!source.canRead()) {
-			LOGGER.warn("Cannot read file: " + sourcePath);
-			throw new IllegalArgumentException("Cannot read file: " + sourcePath);
-		}
 	}
 
 	@Override
@@ -40,7 +31,7 @@ public class FileLotteryService implements LotteryService {
 			
 			return reader.readNext();
 		} catch (IOException e) {
-			LOGGER.warn("I/O error while processing file: " + source.getAbsolutePath());
+			LOGGER.error("I/O error while processing file: " + source.getAbsolutePath());
 			return null;
 		} finally {
 			try {
@@ -75,7 +66,7 @@ public class FileLotteryService implements LotteryService {
 			}
 			return draws;
 		} catch (IOException e) {
-			LOGGER.warn("I/O error while processing file: " + source.getAbsolutePath());
+			LOGGER.error("I/O error while processing file: " + source.getAbsolutePath());
 			return null;
 		} finally {
 			try {
@@ -102,7 +93,7 @@ public class FileLotteryService implements LotteryService {
 			}
 			return draws;
 		} catch (IOException e) {
-			LOGGER.warn("I/O error while processing file: " + source.getAbsolutePath());
+			LOGGER.error("I/O error while processing file: " + source.getAbsolutePath());
 			return null;
 		} finally {
 			try {

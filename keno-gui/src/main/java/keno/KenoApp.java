@@ -1,7 +1,6 @@
 package keno;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -23,6 +22,10 @@ public enum KenoApp {
 	private static final String SOURCE_URL_PROP = "keno.sourceurl";
 	private static final String WORK_DIR_PROP = "keno.workdir";
 	private static final String DATA_FILE_PROP = "keno.datafile";
+	
+	private static final String DEFAULT_SOURCE_URL = "http://www.szerencsejatek.hu/xls/keno.csv";
+	private static final String DEFAULT_WORK_DIR = ".";
+	private static final String DEFAULT_DATA_FILE = "keno.csv";
 	
 	private Properties properties;
 	
@@ -53,15 +56,15 @@ public enum KenoApp {
 	}
 	
 	public String getSourceUrl() {
-		return properties.getProperty(SOURCE_URL_PROP);
+		return properties.getProperty(SOURCE_URL_PROP, DEFAULT_SOURCE_URL);
 	}
 	
 	public String getWorkDir() {
-		return properties.getProperty(WORK_DIR_PROP);
+		return properties.getProperty(WORK_DIR_PROP, DEFAULT_WORK_DIR);
 	}
 	
 	public String getDataFile() {
-		return properties.getProperty(DATA_FILE_PROP);
+		return properties.getProperty(DATA_FILE_PROP, DEFAULT_DATA_FILE);
 	}
 	
 	public String getLotteryFile() {
@@ -70,11 +73,7 @@ public enum KenoApp {
 	
 	public LotteryService getLotteryService() {
 		if (lotteryService == null) {
-			try {
-				lotteryService = new FileLotteryService(getLotteryFile());
-			} catch (FileNotFoundException e) {
-				LOGGER.error("Lottery file not found: " + getLotteryFile());
-			}
+			lotteryService = new FileLotteryService(getLotteryFile());
 		}
 		
 		return lotteryService;

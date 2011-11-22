@@ -3,6 +3,7 @@ package keno.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -15,6 +16,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import keno.KenoApp;
+import keno.model.Draw;
 import keno.util.download.FileDownloader;
 
 import org.apache.log4j.Logger;
@@ -48,7 +50,7 @@ public class MainWindow {
 					public void run() {
 						final JDialog progressWindow = new JDialog(mainFrame, true);
 						progressWindow.setTitle("Letöltés");
-						progressWindow.setSize(200, 100);
+						progressWindow.setSize(300, 100);
 						progressWindow.setLocation(100, 100);
 						progressWindow.setResizable(false);
 						progressWindow.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -77,7 +79,9 @@ public class MainWindow {
 									SwingUtilities.invokeLater(new Runnable() {
 										@Override
 										public void run() {
-											statusLabel.setText("Kész.");
+											Draw draw = KenoApp.INSTANCE.getLotteryService().getMostRecentDraw();
+											String info = draw == null ? "" : " Utolsó húzás: " + new SimpleDateFormat("yyyy.mm.dd.").format(draw.getDate());
+											statusLabel.setText("Kész." + info);
 										}
 									});
 								}
