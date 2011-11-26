@@ -1,11 +1,13 @@
 package keno.gui.panel;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.Box;
@@ -14,7 +16,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.border.LineBorder;
 
 import keno.KenoApp;
 import keno.gui.MainWindow;
@@ -34,6 +35,7 @@ public class InformationPanel extends JPanel {
 	
 	private MainWindow mainWindow;
 	
+	private Box numbersBox;
 	private JLabel statusLabel;
 	private JButton refreshButton;
 	
@@ -49,7 +51,10 @@ public class InformationPanel extends JPanel {
 		final ResourceBundle bundle = app.getResourceBundle();
 		final LotteryService service = app.getLotteryService();
 		
-		statusLabel = new JLabel(getStatus(service.getMostRecentDraw(), bundle));
+		numbersBox = Box.createVerticalBox();
+		Draw mostRecent = service.getMostRecentDraw();
+		fillNumbersBox(mostRecent);
+		statusLabel = new JLabel(getStatus(mostRecent, bundle));
 		statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		refreshButton = new JButton(bundle.getString(REFRESH_KEY));
@@ -58,6 +63,7 @@ public class InformationPanel extends JPanel {
 		refreshButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
+				numbersBox.removeAll();
 				statusLabel.setText(bundle.getString(STATUS_DOWNLOADING_KEY));
 				refreshButton.setEnabled(false);
 				mainWindow.setEnabled(false);
@@ -73,7 +79,9 @@ public class InformationPanel extends JPanel {
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
-								statusLabel.setText(getStatus(service.getMostRecentDraw(), bundle));
+								Draw mostRecent = service.getMostRecentDraw();
+								fillNumbersBox(mostRecent);
+								statusLabel.setText(getStatus(mostRecent, bundle));
 								refreshButton.setEnabled(true);
 								mainWindow.setEnabled(true);
 							}
@@ -85,6 +93,7 @@ public class InformationPanel extends JPanel {
 		
 		Box box = Box.createVerticalBox();
 		box.add(Box.createVerticalGlue());
+		box.add(numbersBox);
 		box.add(statusLabel);
 		box.add(refreshButton);
 		box.add(Box.createVerticalGlue());
@@ -92,11 +101,45 @@ public class InformationPanel extends JPanel {
 		add(box, BorderLayout.CENTER);
 	}
 	
+	private void fillNumbersBox(Draw draw) {
+		numbersBox.removeAll();
+		for (String line : getNumbers(draw)) {
+			JLabel label = new JLabel(line);
+			label.setAlignmentX(Component.CENTER_ALIGNMENT);
+			numbersBox.add(label);
+		}
+	}
+
 	public static String getStatus(Draw mostRecent, ResourceBundle bundle) {
 		return mostRecent == null ? bundle.getString(STATUS_MISSING_KEY) : 
 			bundle.getString(STATUS_LAST_DRAW_KEY)
-				+ ": " + new SimpleDateFormat(bundle.getString(DATE_FORMAT_KEY))
-					.format(mostRecent.getDate());
+			+ ": " + new SimpleDateFormat(bundle.getString(DATE_FORMAT_KEY))
+		.format(mostRecent.getDate());
 	}
-
+	
+	private static List<String> getNumbers(Draw draw) {
+		if (draw == null || draw.getNumbers().length == 0) {
+			return Collections.emptyList();
+		}
+		
+		List<String> result = new ArrayList<String>();
+		
+		StringBuilder builder = new StringBuilder();
+		builder.append(draw.getNumbers()[0]);
+		for (int i = 1; i < draw.getNumbers().length; ++i) {
+			if (i % 5 == 0) {
+				result.add(builder.toString());
+				builder = new StringBuilder();
+				builder.append(draw.getNumbers()[i]);
+			} else {
+				builder.append(" ").append(draw.getNumbers()[i]);
+			}
+		}
+		if (builder.length() > 0) {
+			result.add(builder.toString());
+		}
+		
+		return result;
+	}
+	
 }
