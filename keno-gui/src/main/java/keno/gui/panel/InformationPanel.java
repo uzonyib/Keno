@@ -24,14 +24,14 @@ import keno.service.LotteryService;
 import keno.util.download.FileDownloader;
 
 public class InformationPanel extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
 
 	private static final String DATE_FORMAT_KEY = "app.dateformat";
 	private static final String REFRESH_KEY = "info.refresh";
 	private static final String STATUS_DOWNLOADING_KEY = "info.status.downloading";
 	private static final String STATUS_MISSING_KEY = "info.status.missing";
 	private static final String STATUS_LAST_DRAW_KEY = "info.status.lastdraw";
-
-	private static final long serialVersionUID = 1L;
 	
 	private MainWindow mainWindow;
 	
