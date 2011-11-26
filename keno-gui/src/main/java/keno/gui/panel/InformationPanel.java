@@ -18,6 +18,12 @@ import keno.util.download.FileDownloader;
 
 public class InformationPanel extends JPanel {
 
+	private static final String DATE_FORMAT_KEY = "app.dateformat";
+	private static final String REFRESH_KEY = "info.refresh";
+	private static final String STATUS_DOWNLOADING_KEY = "info.status.downloading";
+	private static final String STATUS_MISSING_KEY = "info.status.missing";
+	private static final String STATUS_LAST_DRAW_KEY = "info.status.lastdraw";
+
 	private static final long serialVersionUID = 1L;
 	
 	private JLabel statusLabel;
@@ -33,12 +39,12 @@ public class InformationPanel extends JPanel {
 		final LotteryService service = app.getLotteryService();
 		
 		statusLabel = new JLabel(getStatus(service.getMostRecentDraw(), bundle));
-		refreshButton = new JButton(bundle.getString("info.refresh"));
+		refreshButton = new JButton(bundle.getString(REFRESH_KEY));
 		
 		refreshButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				statusLabel.setText(bundle.getString("info.refresh.status.downloading"));
+			public void actionPerformed(ActionEvent event) {
+				statusLabel.setText(bundle.getString(STATUS_DOWNLOADING_KEY));
 				refreshButton.setEnabled(false);
 				
 				new SwingWorker<Boolean, Void>() {
@@ -66,9 +72,9 @@ public class InformationPanel extends JPanel {
 	}
 	
 	public static String getStatus(Draw mostRecent, ResourceBundle bundle) {
-		return mostRecent == null ? bundle.getString("info.missing") : 
-			bundle.getString("info.lastdraw")
-				+ ": " + new SimpleDateFormat("yyyy.mm.dd.")
+		return mostRecent == null ? bundle.getString(STATUS_MISSING_KEY) : 
+			bundle.getString(STATUS_LAST_DRAW_KEY)
+				+ ": " + new SimpleDateFormat(bundle.getString(DATE_FORMAT_KEY))
 					.format(mostRecent.getDate());
 	}
 
