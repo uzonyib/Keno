@@ -4,6 +4,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ResourceBundle;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -30,6 +31,9 @@ public class MainWindow {
 	}
 
 	private void initGui() {
+		final KenoApp app = KenoApp.getInstance();
+		final ResourceBundle bundle = app.getResourceBundle();
+		
 		final JFrame mainFrame = new JFrame("Keno Application");
 		mainFrame.setSize(640, 480);
 		mainFrame.setLocation(100, 100);
@@ -37,9 +41,9 @@ public class MainWindow {
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menubar = new JMenuBar();
-		JMenu fileMenu = new JMenu("Fájl");
+		JMenu fileMenu = new JMenu(bundle.getString("menu.file"));
 		menubar.add(fileMenu);
-		JMenuItem refreshMenuItem = new JMenuItem("Frissítés");
+		JMenuItem refreshMenuItem = new JMenuItem(bundle.getString("menu.file.refresh"));
 		fileMenu.add(refreshMenuItem);
 
 		refreshMenuItem.addActionListener(new ActionListener() {
@@ -49,16 +53,16 @@ public class MainWindow {
 					@Override
 					public void run() {
 						final JDialog progressWindow = new JDialog(mainFrame, true);
-						progressWindow.setTitle("Letöltés");
+						progressWindow.setTitle(bundle.getString("info.title"));
 						progressWindow.setSize(300, 100);
 						progressWindow.setLocation(100, 100);
 						progressWindow.setResizable(false);
 						progressWindow.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 						progressWindow.setLayout(new FlowLayout());
 						
-						final JLabel statusLabel = new JLabel("Letöltés...");
+						final JLabel statusLabel = new JLabel(bundle.getString("info.refresh.status.downloading"));
 						progressWindow.add(statusLabel);
-						JButton okButton = new JButton("OK");
+						JButton okButton = new JButton(bundle.getString("info.ok"));
 						okButton.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent e) {
@@ -71,17 +75,18 @@ public class MainWindow {
 							new SwingWorker<Boolean, Void>() {
 								@Override
 								protected Boolean doInBackground() throws Exception {
-									return new FileDownloader(KenoApp.INSTANCE.getSourceUrl(),
-											KenoApp.INSTANCE.getLotteryFile()).download();
+									return new FileDownloader(app.getSourceUrl(),
+											app.getLotteryFile()).download();
 								}
 								@Override
 								protected void done() {
 									SwingUtilities.invokeLater(new Runnable() {
 										@Override
 										public void run() {
-											Draw draw = KenoApp.INSTANCE.getLotteryService().getMostRecentDraw();
-											String info = draw == null ? "" : " Utolsó húzás: " + new SimpleDateFormat("yyyy.mm.dd.").format(draw.getDate());
-											statusLabel.setText("Kész." + info);
+											Draw draw = app.getLotteryService().getMostRecentDraw();
+											String info = draw == null ? "" : " " + bundle.getString("info.lastdraw") + ": " + new SimpleDateFormat("yyyy.mm.dd.").format(draw.getDate());
+											statusLabel.setText(bundle.getString("info.refresh.status.done") + info);
+											progressWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 										}
 									});
 								}
