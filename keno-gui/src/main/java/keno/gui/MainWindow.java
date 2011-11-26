@@ -1,6 +1,6 @@
 package keno.gui;
 
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
@@ -38,12 +38,12 @@ public class MainWindow {
 		mainFrame = new JFrame(bundle.getString(APP_TITLE_KEY));
 		mainFrame.setSize(640, 480);
 		mainFrame.setLocation(100, 100);
-		mainFrame.setLayout(new FlowLayout());
+		mainFrame.setLayout(new BorderLayout());
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setJMenuBar(menuBar);
 		
 		informationPanel = new InformationPanel(this);
-		mainFrame.add(informationPanel);
+		mainFrame.add(informationPanel, BorderLayout.CENTER);
 		
 		mainFrame.setVisible(true);
 	}

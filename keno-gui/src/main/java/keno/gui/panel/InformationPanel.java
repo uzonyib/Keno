@@ -1,15 +1,20 @@
 package keno.gui.panel;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.border.LineBorder;
 
 import keno.KenoApp;
 import keno.gui.MainWindow;
@@ -38,12 +43,17 @@ public class InformationPanel extends JPanel {
 	}
 
 	private void init() {
+		setLayout(new BorderLayout());
+		
 		final KenoApp app = KenoApp.getInstance();
 		final ResourceBundle bundle = app.getResourceBundle();
 		final LotteryService service = app.getLotteryService();
 		
 		statusLabel = new JLabel(getStatus(service.getMostRecentDraw(), bundle));
+		statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		
 		refreshButton = new JButton(bundle.getString(REFRESH_KEY));
+		refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		refreshButton.addActionListener(new ActionListener() {
 			@Override
@@ -73,8 +83,13 @@ public class InformationPanel extends JPanel {
 			}
 		});
 		
-		add(statusLabel);
-		add(refreshButton);
+		Box box = Box.createVerticalBox();
+		box.add(Box.createVerticalGlue());
+		box.add(statusLabel);
+		box.add(refreshButton);
+		box.add(Box.createVerticalGlue());
+		
+		add(box, BorderLayout.CENTER);
 	}
 	
 	public static String getStatus(Draw mostRecent, ResourceBundle bundle) {
