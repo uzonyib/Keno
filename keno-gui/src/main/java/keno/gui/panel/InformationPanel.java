@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import keno.KenoApp;
+import keno.gui.MainWindow;
 import keno.model.Draw;
 import keno.service.LotteryService;
 import keno.util.download.FileDownloader;
@@ -26,10 +27,13 @@ public class InformationPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	
+	private MainWindow mainWindow;
+	
 	private JLabel statusLabel;
 	private JButton refreshButton;
 	
-	public InformationPanel() {
+	public InformationPanel(MainWindow mainWindow) {
+		this.mainWindow = mainWindow;
 		init();
 	}
 
@@ -46,6 +50,7 @@ public class InformationPanel extends JPanel {
 			public void actionPerformed(ActionEvent event) {
 				statusLabel.setText(bundle.getString(STATUS_DOWNLOADING_KEY));
 				refreshButton.setEnabled(false);
+				mainWindow.setEnabled(false);
 				
 				new SwingWorker<Boolean, Void>() {
 					@Override
@@ -60,6 +65,7 @@ public class InformationPanel extends JPanel {
 							public void run() {
 								statusLabel.setText(getStatus(service.getMostRecentDraw(), bundle));
 								refreshButton.setEnabled(true);
+								mainWindow.setEnabled(true);
 							}
 						});
 					}
