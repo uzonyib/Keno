@@ -46,8 +46,7 @@ public class MainWindow {
 		createMenu(bundle);
 		
 		mainFrame = new JFrame(bundle.getString(APP_TITLE_KEY));
-		mainFrame.setSize(640, 480);
-		mainFrame.setLocation(100, 100);
+		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		mainFrame.setLayout(new BorderLayout());
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setJMenuBar(menuBar);

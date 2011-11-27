@@ -82,20 +82,32 @@ public class DrawsPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String DRAWS_DATE_KEY = "draws.date";
-	private static final String DRAWS_COUNT_KEY = "draws.count";
-	private static final String DRAWS_COUNT_10_KEY = "draws.count.10";
-	private static final String DRAWS_COUNT_100_KEY = "draws.count.100";
-	private static final String DRAWS_COUNT_1000_KEY = "draws.count.1000";
-	private static final String DRAWS_COUNT_ALL_KEY = "draws.count.all";
-	private static final String DRAWS_COUNT_CUSTOM_LOAD_KEY = "draws.count.custom.load";
 	private static final String DATE_FORMAT_KEY = "app.dateformat";	
+	private static final String DATE_KEY = "draws.date";
+	private static final String COUNT_KEY = "draws.count";
+	private static final String COUNT_10_KEY = "draws.count.10";
+	private static final String COUNT_100_KEY = "draws.count.100";
+	private static final String COUNT_1000_KEY = "draws.count.1000";
+	private static final String COUNT_ALL_KEY = "draws.count.all";
+	private static final String COUNT_CUSTOM_LOAD_KEY = "draws.count.custom.load";
+
+	private static final String TICKET_SHOW_KEY = "draws.ticket.show";
+	private static final String TICKET_HIDE_KEY = "draws.ticket.hide";
+	private static final String TICKET_CLEAR_KEY = "draws.ticket.clear";
+	private static final String TICKET_FILTER_KEY = "draws.ticket.filter";
 	
 	private MainWindow mainWindow;
 	
 	private LotteryService service;
 	private DrawTableModel drawTableModel;
 	private JTable drawTable;
+	private TicketPanel ticketPanel;
+	
+	private JPanel drawCountSelectionPanel;
+	private JScrollPane tableScrollPane;
+	
+	private Box contentBox;
+	private Box ticketControlBox;
 
 	private JRadioButton radio10;
 	private JRadioButton radio100;
@@ -104,8 +116,12 @@ public class DrawsPanel extends JPanel {
 	private JRadioButton radioCustom;	
 	private JSpinner customCountSpinner;
 	private JButton customCountButton;
+	private JButton ticketVisiblility;
+	private JButton clearTicket;
+	private JButton filterTicket;
 	
 	private int drawCount;
+	private boolean ticketVisible;
 	
 	public DrawsPanel(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
@@ -121,7 +137,7 @@ public class DrawsPanel extends JPanel {
 		ResourceBundle bundle = app.getResourceBundle();
 		
 		String[] columnNames = new String[21];
-		columnNames[0] = bundle.getString(DRAWS_DATE_KEY);
+		columnNames[0] = bundle.getString(DATE_KEY);
 		for (int i = 1; i < 21; ++i) {
 			columnNames[i] = "" + i;
 		}
@@ -134,16 +150,42 @@ public class DrawsPanel extends JPanel {
 		drawTable.getTableHeader().setReorderingAllowed(false);
 		drawTable.getTableHeader().setResizingAllowed(false);
 		
-		Box box = Box.createVerticalBox();
-		box.add(createDrawCountSelectionPanel(bundle));
-		box.add(new JScrollPane(drawTable));
+		ticketPanel = new TicketPanel();
 		
-		add(box, BorderLayout.CENTER);
+		clearTicket = new JButton(bundle.getString(TICKET_CLEAR_KEY));
+		clearTicket.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				ticketPanel.clear();
+			}
+		});
+		
+		filterTicket = new JButton(bundle.getString(TICKET_FILTER_KEY));
+		filterTicket.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				refrashTable(drawCount);
+			}
+		});
+		
+		ticketControlBox = Box.createHorizontalBox();
+		ticketControlBox.add(filterTicket);
+		ticketControlBox.add(clearTicket);
+
+		createDrawCountSelectionPanel(bundle);
+		contentBox = Box.createVerticalBox();
+		contentBox.add(Box.createVerticalGlue());
+		contentBox.add(drawCountSelectionPanel);
+		tableScrollPane = new JScrollPane(drawTable);
+		contentBox.add(tableScrollPane);
+		contentBox.add(Box.createVerticalGlue());
+		
+		add(contentBox, BorderLayout.CENTER);
 	}
 	
-	private Box createDrawCountSelectionPanel(ResourceBundle bundle) {
+	private void createDrawCountSelectionPanel(final ResourceBundle bundle) {
 		radio10 = new JRadioButton(
-				bundle.getString(DRAWS_COUNT_10_KEY));
+				bundle.getString(COUNT_10_KEY));
 		radio10.setSelected(true);
 		radio10.addActionListener(new ActionListener() {
 			@Override
@@ -154,7 +196,7 @@ public class DrawsPanel extends JPanel {
 		});
 		
 		radio100 = new JRadioButton(
-				bundle.getString(DRAWS_COUNT_100_KEY));
+				bundle.getString(COUNT_100_KEY));
 		radio100.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -164,7 +206,7 @@ public class DrawsPanel extends JPanel {
 		});
 		
 		radio1000 = new JRadioButton(
-				bundle.getString(DRAWS_COUNT_1000_KEY));
+				bundle.getString(COUNT_1000_KEY));
 		radio1000.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -174,7 +216,7 @@ public class DrawsPanel extends JPanel {
 		});
 		
 		radioAll = new JRadioButton(
-				bundle.getString(DRAWS_COUNT_ALL_KEY));
+				bundle.getString(COUNT_ALL_KEY));
 		radioAll.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -186,18 +228,43 @@ public class DrawsPanel extends JPanel {
 		radioCustom = new JRadioButton();
 		radioCustom.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent event) {
 				refreshCustomCountEnabled();
 			}
 		});
 		
 		customCountSpinner = new JSpinner(
 				new SpinnerNumberModel(100, 1, Integer.MAX_VALUE, 100));		
-		customCountButton = new JButton(bundle.getString(DRAWS_COUNT_CUSTOM_LOAD_KEY));
+		customCountButton = new JButton(bundle.getString(COUNT_CUSTOM_LOAD_KEY));
 		customCountButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				refrashTable((Integer) customCountSpinner.getValue());
+			}
+		});
+		
+		ticketVisiblility = new JButton(bundle.getString(TICKET_SHOW_KEY));
+		ticketVisiblility.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				if (ticketVisible) {
+					ticketVisiblility.setText(bundle.getString(TICKET_SHOW_KEY));
+					contentBox.remove(ticketPanel);
+					contentBox.remove(ticketControlBox);
+					validate();
+					repaint();
+					ticketVisible = false;
+				} else {
+					ticketVisiblility.setText(bundle.getString(TICKET_HIDE_KEY));
+					contentBox.removeAll();
+					contentBox.add(Box.createVerticalGlue());
+					contentBox.add(drawCountSelectionPanel);
+					contentBox.add(ticketPanel);
+					contentBox.add(ticketControlBox);
+					contentBox.add(tableScrollPane);
+					contentBox.add(Box.createVerticalGlue());
+					ticketVisible = true;
+				}
 			}
 		});
 		
@@ -212,7 +279,7 @@ public class DrawsPanel extends JPanel {
 		
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		box.add(new JLabel(bundle.getString(DRAWS_COUNT_KEY)));
+		box.add(new JLabel(bundle.getString(COUNT_KEY)));
 		box.add(Box.createHorizontalStrut(10));
 		box.add(radio10);
 		box.add(Box.createHorizontalStrut(10));
@@ -225,16 +292,15 @@ public class DrawsPanel extends JPanel {
 		box.add(radioCustom);
 		box.add(customCountSpinner);
 		box.add(customCountButton);
+		box.add(Box.createHorizontalStrut(10));
+		box.add(ticketVisiblility);
 		box.add(Box.createHorizontalGlue());
 		
-		return box;
+		drawCountSelectionPanel = new JPanel();
+		drawCountSelectionPanel.add(box);
 	}
 	
 	private void refrashTable(final int count) {
-		if (count == drawCount) {
-			return;
-		}
-		
 		setPanelEnabled(false);
 		drawCount = count;
 		
@@ -243,9 +309,9 @@ public class DrawsPanel extends JPanel {
 			@Override
 			protected Void doInBackground() throws Exception {
 				if (count <= 0) {
-					draws = service.listDraws();
+					draws = service.listDraws(ticketPanel.getNumberStates());
 				} else {
-					draws = service.listMostRecentDraws(count);
+					draws = service.listMostRecentDraws(count, ticketPanel.getNumberStates());
 				}
 				return null;
 			}
@@ -269,6 +335,10 @@ public class DrawsPanel extends JPanel {
 		radioAll.setEnabled(enabled);
 		radioCustom.setEnabled(enabled);
 		refreshCustomCountEnabled();
+		ticketVisiblility.setEnabled(enabled);
+		ticketPanel.setEnabled(enabled);
+		clearTicket.setEnabled(enabled);
+		filterTicket.setEnabled(enabled);
 		drawTable.setEnabled(enabled);
 		mainWindow.setEnabled(enabled);
 	}

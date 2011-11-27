@@ -15,6 +15,19 @@ public class Draw {
 	public Draw() {
 		
 	}
+	
+	public boolean hasNumber(byte number) {
+		if (numbers == null) {
+			return false;
+		}
+		
+		for (byte n : numbers) {
+			if (n == number) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public short getYear() {
 		return year;
