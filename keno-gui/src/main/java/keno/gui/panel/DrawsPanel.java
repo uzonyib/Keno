@@ -11,11 +11,14 @@ import java.util.ResourceBundle;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
@@ -85,6 +88,7 @@ public class DrawsPanel extends JPanel {
 	private static final String DRAWS_COUNT_100_KEY = "draws.count.100";
 	private static final String DRAWS_COUNT_1000_KEY = "draws.count.1000";
 	private static final String DRAWS_COUNT_ALL_KEY = "draws.count.all";
+	private static final String DRAWS_COUNT_CUSTOM_LOAD_KEY = "draws.count.custom.load";
 	private static final String DATE_FORMAT_KEY = "app.dateformat";	
 	
 	private MainWindow mainWindow;
@@ -97,6 +101,9 @@ public class DrawsPanel extends JPanel {
 	private JRadioButton radio100;
 	private JRadioButton radio1000;
 	private JRadioButton radioAll;
+	private JRadioButton radioCustom;	
+	private JSpinner customCountSpinner;
+	private JButton customCountButton;
 	
 	private int drawCount;
 	
@@ -140,7 +147,8 @@ public class DrawsPanel extends JPanel {
 		radio10.setSelected(true);
 		radio10.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent event) {
+				refreshCustomCountEnabled();
 				refrashTable(10);
 			}
 		});
@@ -149,7 +157,8 @@ public class DrawsPanel extends JPanel {
 				bundle.getString(DRAWS_COUNT_100_KEY));
 		radio100.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent event) {
+				refreshCustomCountEnabled();
 				refrashTable(100);
 			}
 		});
@@ -158,7 +167,8 @@ public class DrawsPanel extends JPanel {
 				bundle.getString(DRAWS_COUNT_1000_KEY));
 		radio1000.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent event) {
+				refreshCustomCountEnabled();
 				refrashTable(1000);
 			}
 		});
@@ -167,23 +177,55 @@ public class DrawsPanel extends JPanel {
 				bundle.getString(DRAWS_COUNT_ALL_KEY));
 		radioAll.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent event) {
+				refreshCustomCountEnabled();
 				refrashTable(-1);
 			}
 		});
+		
+		radioCustom = new JRadioButton();
+		radioCustom.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				refreshCustomCountEnabled();
+			}
+		});
+		
+		customCountSpinner = new JSpinner(
+				new SpinnerNumberModel(100, 1, Integer.MAX_VALUE, 100));		
+		customCountButton = new JButton(bundle.getString(DRAWS_COUNT_CUSTOM_LOAD_KEY));
+		customCountButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				refrashTable((Integer) customCountSpinner.getValue());
+			}
+		});
+		
+		refreshCustomCountEnabled();
 		
 		ButtonGroup group = new ButtonGroup();
 		group.add(radio10);
 		group.add(radio100);
 		group.add(radio1000);
 		group.add(radioAll);
+		group.add(radioCustom);
 		
 		Box box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
 		box.add(new JLabel(bundle.getString(DRAWS_COUNT_KEY)));
+		box.add(Box.createHorizontalStrut(10));
 		box.add(radio10);
+		box.add(Box.createHorizontalStrut(10));
 		box.add(radio100);
+		box.add(Box.createHorizontalStrut(10));
 		box.add(radio1000);
+		box.add(Box.createHorizontalStrut(10));
 		box.add(radioAll);
+		box.add(Box.createHorizontalStrut(10));
+		box.add(radioCustom);
+		box.add(customCountSpinner);
+		box.add(customCountButton);
+		box.add(Box.createHorizontalGlue());
 		
 		return box;
 	}
@@ -193,7 +235,7 @@ public class DrawsPanel extends JPanel {
 			return;
 		}
 		
-		doSetEnabled(false);
+		setPanelEnabled(false);
 		drawCount = count;
 		
 		new SwingWorker<Void, Void>() {
@@ -213,20 +255,28 @@ public class DrawsPanel extends JPanel {
 					@Override
 					public void run() {
 						drawTableModel.setDraws(draws);
-						doSetEnabled(true);
+						setPanelEnabled(true);
 					}
 				});
 			}
 		}.execute();
 	}
 	
-	private void doSetEnabled(boolean enabled) {
+	private void setPanelEnabled(boolean enabled) {
 		radio10.setEnabled(enabled);
 		radio100.setEnabled(enabled);
 		radio1000.setEnabled(enabled);
 		radioAll.setEnabled(enabled);
+		radioCustom.setEnabled(enabled);
+		refreshCustomCountEnabled();
 		drawTable.setEnabled(enabled);
 		mainWindow.setEnabled(enabled);
+	}
+	
+	private void refreshCustomCountEnabled() {
+		boolean enabled = radioCustom.isSelected();
+		customCountSpinner.setEnabled(enabled);
+		customCountButton.setEnabled(enabled);
 	}
 
 }

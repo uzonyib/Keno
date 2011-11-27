@@ -103,18 +103,18 @@ public class MainWindow {
 	
 	public void setEnabled(final boolean enabled) {
 		if (SwingUtilities.isEventDispatchThread()) {
-			doSetEnabled(enabled);
+			setWindowEnabled(enabled);
 		} else {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					doSetEnabled(enabled);
+					setWindowEnabled(enabled);
 				}
 			});
 		}
 	}
 
-	private void doSetEnabled(boolean enabled) {
+	private void setWindowEnabled(boolean enabled) {
 		mainFrame.setDefaultCloseOperation(enabled ? JFrame.EXIT_ON_CLOSE
 				: JFrame.DO_NOTHING_ON_CLOSE);
 		menuBar.setEnabled(enabled);
