@@ -119,7 +119,7 @@ public class InformationPanel extends JPanel {
 	
 	private static List<String> getNumbers(Draw draw) {
 		if (draw == null || draw.getNumbers().length == 0) {
-			return Collections.emptyList();
+			return Collections.<String>emptyList();
 		}
 		
 		List<String> result = new ArrayList<String>();

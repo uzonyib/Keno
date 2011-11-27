@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import keno.model.Draw;
@@ -67,7 +68,7 @@ public class FileLotteryService implements LotteryService {
 			return draws;
 		} catch (IOException e) {
 			LOGGER.error("I/O error while processing file: " + source.getAbsolutePath());
-			return null;
+			return Collections.<Draw>emptyList();
 		} finally {
 			try {
 				if (fr != null) {
@@ -94,7 +95,7 @@ public class FileLotteryService implements LotteryService {
 			return draws;
 		} catch (IOException e) {
 			LOGGER.error("I/O error while processing file: " + source.getAbsolutePath());
-			return null;
+			return Collections.<Draw>emptyList();
 		} finally {
 			try {
 				if (fr != null) {

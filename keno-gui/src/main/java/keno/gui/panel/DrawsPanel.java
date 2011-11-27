@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -119,7 +119,7 @@ public class DrawsPanel extends JPanel {
 			columnNames[i] = "" + i;
 		}
 		drawTableModel = new DrawTableModel(columnNames,
-				new ArrayList<Draw>(),
+				Collections.<Draw>emptyList(),
 				new SimpleDateFormat(bundle.getString(DATE_FORMAT_KEY)));
 		
 		drawTable = new JTable(drawTableModel);
