@@ -53,7 +53,7 @@ public class MainWindow {
 		mainFrame.setJMenuBar(menuBar);
 		
 		informationPanel = new InformationPanel(this);
-		drawsPanel = new DrawsPanel();
+		drawsPanel = new DrawsPanel(this);
 		
 		mainFrame.add(informationPanel, BorderLayout.CENTER);
 		mainFrame.setVisible(true);
