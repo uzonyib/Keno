@@ -91,7 +91,7 @@ public class FileLotteryService implements LotteryService {
 			if (filter.get(i) == NumberState.SELECTED
 					&& !draw.hasNumber((byte) (i + 1))) {
 				return false;
-			} else if (filter.get(i) == NumberState.DESELECTED
+			} else if (filter.get(i) == NumberState.UNSELECTED
 					&& draw.hasNumber((byte) (i + 1))) {
 				return false;
 			}

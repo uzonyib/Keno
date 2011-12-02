@@ -3,26 +3,36 @@ package keno.service.file;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import keno.model.Draw;
+import keno.model.NumberState;
 import keno.service.LotteryService;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FileLotteryServiceTest {
 	
-	private LotteryService service;
+	private static LotteryService service;
 	
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
 	
-	@Before
-	public void init() throws FileNotFoundException {
-		this.service = new FileLotteryService(getClass().getResource("/keno-test.csv").getFile());
+	private static List<NumberState> numberStates = new ArrayList<NumberState>(80);
+	
+	@BeforeClass
+	public static void init() throws FileNotFoundException {
+		service = new FileLotteryService(FileLotteryServiceTest.class
+				.getResource("/keno-test.csv").getFile());
+		
+		for (int i = 0; i < 80; ++i) {
+			numberStates.add(NumberState.ANY);
+		}
 	}
 	
 	@Test
@@ -75,6 +85,49 @@ public class FileLotteryServiceTest {
 		
 		draws = service.listMostRecentDraws(15);
 		assertEquals(10, draws.size());
+		
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(10, draws.size());
+		
+		numberStates.set(0, NumberState.SELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(3, draws.size());
+		assertEquals("2011-11-04", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-10-31", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-10-28", dateFormat.format(draws.get(2).getDate()));
+		
+		numberStates.set(0, NumberState.UNSELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(7, draws.size());
+		assertEquals("2011-11-06", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-11-05", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-11-03", dateFormat.format(draws.get(2).getDate()));
+		assertEquals("2011-11-02", dateFormat.format(draws.get(3).getDate()));
+		assertEquals("2011-11-01", dateFormat.format(draws.get(4).getDate()));
+		assertEquals("2011-10-30", dateFormat.format(draws.get(5).getDate()));
+		assertEquals("2011-10-29", dateFormat.format(draws.get(6).getDate()));
+		
+		numberStates.set(1, NumberState.UNSELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(5, draws.size());
+		assertEquals("2011-11-06", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-11-05", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-11-03", dateFormat.format(draws.get(2).getDate()));
+		assertEquals("2011-11-01", dateFormat.format(draws.get(3).getDate()));
+		assertEquals("2011-10-29", dateFormat.format(draws.get(4).getDate()));
+		
+		numberStates.set(0, NumberState.SELECTED);
+		numberStates.set(1, NumberState.SELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertTrue(draws.isEmpty());
+		
+		numberStates.set(0, NumberState.ANY);
+		numberStates.set(1, NumberState.ANY);
 	}
 	
 	@Test
@@ -85,6 +138,45 @@ public class FileLotteryServiceTest {
 		for (int i = 0; i < 10; ++i) {
 			assertNotNull(draws.get(i));
 		}
+		
+		numberStates.set(0, NumberState.SELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(3, draws.size());
+		assertEquals("2011-11-04", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-10-31", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-10-28", dateFormat.format(draws.get(2).getDate()));
+		
+		numberStates.set(0, NumberState.UNSELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(7, draws.size());
+		assertEquals("2011-11-06", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-11-05", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-11-03", dateFormat.format(draws.get(2).getDate()));
+		assertEquals("2011-11-02", dateFormat.format(draws.get(3).getDate()));
+		assertEquals("2011-11-01", dateFormat.format(draws.get(4).getDate()));
+		assertEquals("2011-10-30", dateFormat.format(draws.get(5).getDate()));
+		assertEquals("2011-10-29", dateFormat.format(draws.get(6).getDate()));
+		
+		numberStates.set(1, NumberState.UNSELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertEquals(5, draws.size());
+		assertEquals("2011-11-06", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-11-05", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-11-03", dateFormat.format(draws.get(2).getDate()));
+		assertEquals("2011-11-01", dateFormat.format(draws.get(3).getDate()));
+		assertEquals("2011-10-29", dateFormat.format(draws.get(4).getDate()));
+		
+		numberStates.set(0, NumberState.SELECTED);
+		numberStates.set(1, NumberState.SELECTED);
+		draws = service.listMostRecentDraws(10, numberStates);
+		assertNotNull(draws);
+		assertTrue(draws.isEmpty());
+		
+		numberStates.set(0, NumberState.ANY);
+		numberStates.set(1, NumberState.ANY);
 	}
 
 }

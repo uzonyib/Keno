@@ -40,7 +40,7 @@ public class TicketPanel extends JPanel {
 			case SELECTED:
 				setBackground(Color.GREEN);
 				break;
-			case DESELECTED:
+			case UNSELECTED:
 				setBackground(Color.RED);
 				break;
 			default:
@@ -55,7 +55,7 @@ public class TicketPanel extends JPanel {
 				setState(NumberState.SELECTED);
 				break;
 			case SELECTED:
-				setState(NumberState.DESELECTED);
+				setState(NumberState.UNSELECTED);
 				break;
 			default:
 				setState(NumberState.ANY);
