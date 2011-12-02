@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
@@ -96,8 +97,11 @@ public class DrawsPanel extends JPanel {
 	private static final String TICKET_CLEAR_KEY = "draws.ticket.clear";
 	private static final String TICKET_FILTER_KEY = "draws.ticket.filter";
 	
+	private static final String INFO_DRAW_COUNT_KEY = "draws.info.drawcount";
+	
 	private int drawCount;
 	private boolean ticketVisible;
+	private String drawCountFormat;
 	private LotteryService service;
 	
 	private MainWindow mainWindow;
@@ -121,6 +125,8 @@ public class DrawsPanel extends JPanel {
 	private JButton ticketVisiblility;
 	private JButton clearTicket;
 	private JButton filterTicket;
+	
+	private JLabel drawCountLabel;
 	
 	public DrawsPanel(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
@@ -175,11 +181,16 @@ public class DrawsPanel extends JPanel {
 
 		createDrawCountSelectionPanel(bundle);
 		
+		drawCountFormat = bundle.getString(INFO_DRAW_COUNT_KEY);
+		drawCountLabel = new JLabel(MessageFormat.format(drawCountFormat,
+				drawTable.getModel().getRowCount()));
+		
 		controlPanel = Box.createVerticalBox();
 		controlPanel.add(drawCountSelectionPanel);
 		
 		add(controlPanel, BorderLayout.NORTH);
 		add(tableScrollPane, BorderLayout.CENTER);
+		add(drawCountLabel, BorderLayout.SOUTH);
 	}
 	
 	private void createDrawCountSelectionPanel(final ResourceBundle bundle) {
@@ -317,6 +328,8 @@ public class DrawsPanel extends JPanel {
 					@Override
 					public void run() {
 						drawTableModel.setDraws(draws);
+						drawCountLabel.setText(MessageFormat.format(
+								drawCountFormat, drawTable.getModel().getRowCount()));
 						setPanelEnabled(true);
 					}
 				});
