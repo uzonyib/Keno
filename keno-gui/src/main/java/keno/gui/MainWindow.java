@@ -1,6 +1,7 @@
 package keno.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
@@ -48,6 +49,7 @@ public class MainWindow {
 		mainFrame = new JFrame(bundle.getString(APP_TITLE_KEY));
 		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		mainFrame.setLayout(new BorderLayout());
+		mainFrame.setSize(new Dimension(800, 600));
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setJMenuBar(menuBar);
 		

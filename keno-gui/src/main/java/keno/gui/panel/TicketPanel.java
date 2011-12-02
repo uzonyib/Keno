@@ -1,12 +1,14 @@
 package keno.gui.panel;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -67,6 +69,9 @@ public class TicketPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private JPanel buttonPanel;
+	private Box buttonBox;
+	
 	private List<TicketButton> buttons;
 
 	public TicketPanel() {
@@ -74,14 +79,22 @@ public class TicketPanel extends JPanel {
 	}
 	
 	private void init() {
-		setLayout(new GridLayout(8, 10));
+		buttonPanel = new JPanel(new GridLayout(8, 10));
 		
 		buttons = new ArrayList<TicketButton>();
 		for (int i = 0; i < 80; ++i) {
 			TicketButton button = new TicketButton("" + (i + 1));
+			button.setPreferredSize(new Dimension(50, 30));
 			buttons.add(button);
-			add(button);
+			buttonPanel.add(button);
 		}
+		
+		buttonBox = Box.createHorizontalBox();
+		buttonBox.add(Box.createHorizontalGlue());
+		buttonBox.add(buttonPanel);
+		buttonBox.add(Box.createHorizontalGlue());
+		
+		add(buttonBox);
 	}
 	
 	public List<NumberState> getNumberStates() {
