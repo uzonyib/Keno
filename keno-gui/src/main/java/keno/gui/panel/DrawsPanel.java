@@ -1,6 +1,7 @@
 package keno.gui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
@@ -21,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
 import keno.KenoApp;
@@ -96,18 +98,20 @@ public class DrawsPanel extends JPanel {
 	private static final String TICKET_CLEAR_KEY = "draws.ticket.clear";
 	private static final String TICKET_FILTER_KEY = "draws.ticket.filter";
 	
+	private int drawCount;
+	private boolean ticketVisible;
+	private LotteryService service;
+	
 	private MainWindow mainWindow;
 	
-	private LotteryService service;
-	private DrawTableModel drawTableModel;
-	private JTable drawTable;
-	private TicketPanel ticketPanel;
-	
 	private JPanel drawCountSelectionPanel;
-	private JScrollPane tableScrollPane;
-	
-	private Box contentBox;
+	private TicketPanel ticketPanel;
 	private Box ticketControlBox;
+	private Box controlPanel;
+	
+	private DrawTableModel drawTableModel;
+	private JTable drawTable;	
+	private JScrollPane tableScrollPane;	
 
 	private JRadioButton radio10;
 	private JRadioButton radio100;
@@ -119,9 +123,6 @@ public class DrawsPanel extends JPanel {
 	private JButton ticketVisiblility;
 	private JButton clearTicket;
 	private JButton filterTicket;
-	
-	private int drawCount;
-	private boolean ticketVisible;
 	
 	public DrawsPanel(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
@@ -150,6 +151,8 @@ public class DrawsPanel extends JPanel {
 		drawTable.getTableHeader().setReorderingAllowed(false);
 		drawTable.getTableHeader().setResizingAllowed(false);
 		
+		tableScrollPane = new JScrollPane(drawTable);
+		
 		ticketPanel = new TicketPanel();
 		
 		clearTicket = new JButton(bundle.getString(TICKET_CLEAR_KEY));
@@ -173,14 +176,12 @@ public class DrawsPanel extends JPanel {
 		ticketControlBox.add(clearTicket);
 
 		createDrawCountSelectionPanel(bundle);
-		contentBox = Box.createVerticalBox();
-		contentBox.add(Box.createVerticalGlue());
-		contentBox.add(drawCountSelectionPanel);
-		tableScrollPane = new JScrollPane(drawTable);
-		contentBox.add(tableScrollPane);
-		contentBox.add(Box.createVerticalGlue());
 		
-		add(contentBox, BorderLayout.CENTER);
+		controlPanel = Box.createVerticalBox();
+		controlPanel.add(drawCountSelectionPanel);
+		
+		add(controlPanel, BorderLayout.NORTH);
+		add(tableScrollPane, BorderLayout.CENTER);
 	}
 	
 	private void createDrawCountSelectionPanel(final ResourceBundle bundle) {
@@ -249,20 +250,17 @@ public class DrawsPanel extends JPanel {
 			public void actionPerformed(ActionEvent event) {
 				if (ticketVisible) {
 					ticketVisiblility.setText(bundle.getString(TICKET_SHOW_KEY));
-					contentBox.remove(ticketPanel);
-					contentBox.remove(ticketControlBox);
+					controlPanel.remove(ticketPanel);
+					controlPanel.remove(ticketControlBox);
 					validate();
 					repaint();
 					ticketVisible = false;
 				} else {
 					ticketVisiblility.setText(bundle.getString(TICKET_HIDE_KEY));
-					contentBox.removeAll();
-					contentBox.add(Box.createVerticalGlue());
-					contentBox.add(drawCountSelectionPanel);
-					contentBox.add(ticketPanel);
-					contentBox.add(ticketControlBox);
-					contentBox.add(tableScrollPane);
-					contentBox.add(Box.createVerticalGlue());
+					controlPanel.removeAll();
+					controlPanel.add(drawCountSelectionPanel);
+					controlPanel.add(ticketPanel);
+					controlPanel.add(ticketControlBox);
 					ticketVisible = true;
 				}
 			}
