@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -40,6 +41,7 @@ public class DrawsPanel extends JPanel {
 	private static final String TICKET_HIDE_KEY = "draws.ticket.hide";
 	private static final String TICKET_CLEAR_KEY = "draws.ticket.clear";
 	private static final String TICKET_FILTER_KEY = "draws.ticket.filter";
+	private static final String TICKET_HIDE_FILTERED = "draws.ticket.hidefiltered";
 	
 	private static final String INFO_DRAW_COUNT_KEY = "draws.info.drawcount";
 	
@@ -65,6 +67,7 @@ public class DrawsPanel extends JPanel {
 	private JSpinner customCountSpinner;
 	private JButton customCountButton;
 	private JButton ticketVisiblility;
+	private JCheckBox hideFiltered;
 	private JButton clearTicket;
 	private JButton filterTicket;
 	
@@ -203,6 +206,14 @@ public class DrawsPanel extends JPanel {
 			}
 		});
 		
+		hideFiltered = new JCheckBox(bundle.getString(TICKET_HIDE_FILTERED), true);
+		hideFiltered.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				refreshTable(drawCount);
+			}
+		});
+		
 		refreshCustomCountEnabled();
 		
 		ButtonGroup group = new ButtonGroup();
@@ -229,6 +240,8 @@ public class DrawsPanel extends JPanel {
 		box.add(customCountButton);
 		box.add(Box.createHorizontalStrut(10));
 		box.add(ticketVisiblility);
+		box.add(Box.createHorizontalStrut(10));
+		box.add(hideFiltered);
 		box.add(Box.createHorizontalGlue());
 		
 		drawCountSelectionPanel = new JPanel();
@@ -244,10 +257,11 @@ public class DrawsPanel extends JPanel {
 			List<Draw> draws;
 			@Override
 			protected Void doInBackground() throws Exception {
+				List<NumberState> filter = hideFiltered.isSelected() ? numberStates : null;
 				if (count <= 0) {
-					draws = service.listDraws(numberStates);
+					draws = service.listMostRecentDraws(filter);
 				} else {
-					draws = service.listMostRecentDraws(count, numberStates);
+					draws = service.listMostRecentDraws(count, filter);
 				}
 				return null;
 			}
@@ -274,6 +288,7 @@ public class DrawsPanel extends JPanel {
 		radioCustom.setEnabled(enabled);
 		refreshCustomCountEnabled();
 		ticketVisiblility.setEnabled(enabled);
+		hideFiltered.setEnabled(enabled);
 		ticketPanel.setEnabled(enabled);
 		clearTicket.setEnabled(enabled);
 		filterTicket.setEnabled(enabled);

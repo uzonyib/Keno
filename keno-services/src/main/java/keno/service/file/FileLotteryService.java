@@ -100,12 +100,12 @@ public class FileLotteryService implements LotteryService {
 	}
 
 	@Override
-	public List<Draw> listDraws() {
+	public List<Draw> listMostRecentDraws() {
 		return listMostRecentDraws(-1);
 	}
 	
 	@Override
-	public List<Draw> listDraws(List<NumberState> filter) {
+	public List<Draw> listMostRecentDraws(List<NumberState> filter) {
 		return listMostRecentDraws(-1, filter);
 	}
 

@@ -132,7 +132,7 @@ public class FileLotteryServiceTest {
 	
 	@Test
 	public void testListDraws() {
-		List<Draw> draws = service.listDraws();
+		List<Draw> draws = service.listMostRecentDraws();
 		assertNotNull(draws);
 		assertEquals(10, draws.size());
 		for (int i = 0; i < 10; ++i) {

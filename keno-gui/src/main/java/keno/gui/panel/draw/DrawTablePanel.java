@@ -90,10 +90,30 @@ public class DrawTablePanel extends JPanel {
 		
 		private static final long serialVersionUID = 1L;
 		
+		private static final String COLOR_DEFAULT_KEY = "draws.color.default";
+		private static final String COLOR_SELECTED_KEY = "draws.color.selected";
+		private static final String COLOR_UNSELECTED_KEY = "draws.color.unselected";
+		private static final String COLOR_DEFAULT_SELECTED_KEY = "draws.color.default.selected";
+		private static final String COLOR_SELECTED_SELECTED_KEY = "draws.color.selected.selected";
+		private static final String COLOR_UNSELECTED_SELECTED_KEY = "draws.color.unselected.selected";
+		
 		private DrawTableModel model;
+		
+		private Color defaultColor;
+		private Color selectedColor;
+		private Color unselectedColor;
+		private Color defaultSelectedColor;
+		private Color selectedSelectedColor;
+		private Color unselectedSelectedColor;
 
-		public DrawTableRenderer(DrawTableModel model) {
+		public DrawTableRenderer(DrawTableModel model, ResourceBundle bundle) {
 			this.model = model;
+			defaultColor = Color.decode(bundle.getString(COLOR_DEFAULT_KEY));
+			selectedColor = Color.decode(bundle.getString(COLOR_SELECTED_KEY));
+			unselectedColor = Color.decode(bundle.getString(COLOR_UNSELECTED_KEY));
+			defaultSelectedColor = Color.decode(bundle.getString(COLOR_DEFAULT_SELECTED_KEY));
+			selectedSelectedColor = Color.decode(bundle.getString(COLOR_SELECTED_SELECTED_KEY));
+			unselectedSelectedColor = Color.decode(bundle.getString(COLOR_UNSELECTED_SELECTED_KEY));
 		}
 
 		@Override
@@ -102,10 +122,41 @@ public class DrawTablePanel extends JPanel {
 				int column) {
 			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
 							row, column);
-			if (model.getState(row, column) == NumberState.SELECTED) {
-				renderer.setBackground(Color.GREEN);				
-			} else {
-				renderer.setBackground(Color.WHITE);				
+			NumberState state = model.getState(row, column);
+			
+			if (isSelected) {
+				if (state == null) {
+					renderer.setBackground(defaultSelectedColor);
+					return renderer;
+				}
+				switch (state) {
+					case SELECTED:
+						renderer.setBackground(selectedSelectedColor);
+						break;
+					case UNSELECTED:
+						renderer.setBackground(unselectedSelectedColor);
+						break;
+					default:
+						renderer.setBackground(defaultSelectedColor);
+						break;
+				}
+				return renderer;
+			}
+			
+			if (state == null) {
+				renderer.setBackground(defaultColor);
+				return renderer;
+			}
+			switch (state) {
+				case SELECTED:
+					renderer.setBackground(selectedColor);
+					break;
+				case UNSELECTED:
+					renderer.setBackground(unselectedColor);
+					break;
+				default:
+					renderer.setBackground(defaultColor);
+					break;
 			}
 			return renderer;
 		}
@@ -137,7 +188,7 @@ public class DrawTablePanel extends JPanel {
 				new SimpleDateFormat(bundle.getString(DATE_FORMAT_KEY)));
 		
 		table = new JTable(tableModel);
-		table.setDefaultRenderer(Object.class, new DrawTableRenderer(tableModel));
+		table.setDefaultRenderer(Object.class, new DrawTableRenderer(tableModel, bundle));
 		table.getColumnModel().getColumn(0).setMinWidth(80);
 		table.getTableHeader().setReorderingAllowed(false);
 		table.getTableHeader().setResizingAllowed(false);

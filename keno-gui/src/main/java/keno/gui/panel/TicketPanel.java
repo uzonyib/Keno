@@ -7,11 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import keno.KenoApp;
 import keno.model.NumberState;
 
 public class TicketPanel extends JPanel {
@@ -19,6 +21,10 @@ public class TicketPanel extends JPanel {
 	private static class TicketButton extends JButton {
 		
 		private static final long serialVersionUID = 1L;
+		
+		private static Color defaultColor = Color.WHITE;
+		private static Color selectedColor = Color.GREEN;
+		private static Color unselectedColor = Color.RED;
 		
 		private NumberState state;
 
@@ -36,17 +42,23 @@ public class TicketPanel extends JPanel {
 		public NumberState getState() {
 			return state;
 		}
+		
 		public void setState(NumberState state) {
-			this.state = state;
-			switch (state) {
+			if (state == null) {
+				this.state = NumberState.ANY;
+			} else {
+				this.state = state;
+			}
+			
+			switch (this.state) {
 			case SELECTED:
-				setBackground(Color.GREEN);
+				setBackground(selectedColor);
 				break;
 			case UNSELECTED:
-				setBackground(Color.RED);
+				setBackground(unselectedColor);
 				break;
 			default:
-				setBackground(Color.WHITE);
+				setBackground(defaultColor);
 				break;
 			}
 		}
@@ -69,6 +81,10 @@ public class TicketPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private static final String COLOR_DEFAULT_KEY = "draws.color.default";
+	private static final String COLOR_SELECTED_KEY = "draws.color.selected";
+	private static final String COLOR_UNSELECTED_KEY = "draws.color.unselected";
+	
 	private JPanel buttonPanel;
 	private Box buttonBox;
 	
@@ -79,6 +95,13 @@ public class TicketPanel extends JPanel {
 	}
 	
 	private void init() {
+		KenoApp app = KenoApp.getInstance();
+		ResourceBundle bundle = app.getResourceBundle();
+		
+		TicketButton.defaultColor = Color.decode(bundle.getString(COLOR_DEFAULT_KEY));
+		TicketButton.selectedColor = Color.decode(bundle.getString(COLOR_SELECTED_KEY));
+		TicketButton.unselectedColor = Color.decode(bundle.getString(COLOR_UNSELECTED_KEY));
+		
 		buttonPanel = new JPanel(new GridLayout(8, 10));
 		
 		buttons = new ArrayList<TicketButton>();
