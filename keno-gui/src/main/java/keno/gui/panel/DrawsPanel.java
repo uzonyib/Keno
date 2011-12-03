@@ -3,10 +3,7 @@ package keno.gui.panel;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -16,75 +13,22 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.table.AbstractTableModel;
 
 import keno.KenoApp;
 import keno.gui.MainWindow;
+import keno.gui.panel.draw.DrawTablePanel;
 import keno.model.Draw;
+import keno.model.NumberState;
 import keno.service.LotteryService;
 
 public class DrawsPanel extends JPanel {
 
-	private static class DrawTableModel extends AbstractTableModel {
-		
-		private static final long serialVersionUID = 1L;
-		
-		private String[] columnNames;
-		private List<Draw> draws;
-		private DateFormat dateFormat;
-
-		public DrawTableModel(String[] columnNames, List<Draw> draws, DateFormat dateFormat) {
-			this.columnNames = columnNames;
-			this.draws = draws;
-			this.dateFormat = dateFormat;
-		}
-		
-		public void setDraws(List<Draw> draws) {
-			this.draws = draws;
-			fireTableDataChanged();
-		}
-
-		@Override
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		@Override
-		public int getRowCount() {
-			return draws.size();
-		}
-
-		@Override
-		public Object getValueAt(int row, int column) {
-			Draw draw = draws.get(row);
-			if (column == 0) {
-				if (draw.getDate() != null) {
-					return dateFormat.format(draw.getDate());
-				} else {
-					return draw.getYear() + "/" + draw.getWeek();
-				}
-			} else {
-				return draw.getNumbers()[column - 1];
-			}
-		}
-		
-		@Override
-		public String getColumnName(int column) {
-			return columnNames[column];
-		}
-		
-	}
-
 	private static final long serialVersionUID = 1L;
 	
-	private static final String DATE_FORMAT_KEY = "app.dateformat";	
-	private static final String DATE_KEY = "draws.date";
 	private static final String COUNT_KEY = "draws.count";
 	private static final String COUNT_10_KEY = "draws.count.10";
 	private static final String COUNT_100_KEY = "draws.count.100";
@@ -111,9 +55,7 @@ public class DrawsPanel extends JPanel {
 	private Box ticketControlBox;
 	private Box controlPanel;
 	
-	private DrawTableModel drawTableModel;
-	private JTable drawTable;	
-	private JScrollPane tableScrollPane;	
+	private DrawTablePanel drawTablePanel;
 
 	private JRadioButton radio10;
 	private JRadioButton radio100;
@@ -131,7 +73,7 @@ public class DrawsPanel extends JPanel {
 	public DrawsPanel(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		init();
-		refrashTable(10);
+		refreshTable(10);
 	}
 
 	private void init() {
@@ -141,21 +83,7 @@ public class DrawsPanel extends JPanel {
 		service = app.getLotteryService();
 		ResourceBundle bundle = app.getResourceBundle();
 		
-		String[] columnNames = new String[21];
-		columnNames[0] = bundle.getString(DATE_KEY);
-		for (int i = 1; i < 21; ++i) {
-			columnNames[i] = "" + i;
-		}
-		drawTableModel = new DrawTableModel(columnNames,
-				Collections.<Draw>emptyList(),
-				new SimpleDateFormat(bundle.getString(DATE_FORMAT_KEY)));
-		
-		drawTable = new JTable(drawTableModel);
-		drawTable.getColumnModel().getColumn(0).setMinWidth(80);
-		drawTable.getTableHeader().setReorderingAllowed(false);
-		drawTable.getTableHeader().setResizingAllowed(false);
-		
-		tableScrollPane = new JScrollPane(drawTable);
+		drawTablePanel = new DrawTablePanel();
 		
 		ticketPanel = new TicketPanel();
 		
@@ -171,7 +99,7 @@ public class DrawsPanel extends JPanel {
 		filterTicket.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				refrashTable(drawCount);
+				refreshTable(drawCount);
 			}
 		});
 		
@@ -183,13 +111,13 @@ public class DrawsPanel extends JPanel {
 		
 		drawCountFormat = bundle.getString(INFO_DRAW_COUNT_KEY);
 		drawCountLabel = new JLabel(MessageFormat.format(drawCountFormat,
-				drawTable.getModel().getRowCount()));
+				drawTablePanel.getDrawCount()));
 		
 		controlPanel = Box.createVerticalBox();
 		controlPanel.add(drawCountSelectionPanel);
 		
 		add(controlPanel, BorderLayout.NORTH);
-		add(tableScrollPane, BorderLayout.CENTER);
+		add(drawTablePanel, BorderLayout.CENTER);
 		add(drawCountLabel, BorderLayout.SOUTH);
 	}
 	
@@ -201,7 +129,7 @@ public class DrawsPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				refreshCustomCountEnabled();
-				refrashTable(10);
+				refreshTable(10);
 			}
 		});
 		
@@ -211,7 +139,7 @@ public class DrawsPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				refreshCustomCountEnabled();
-				refrashTable(100);
+				refreshTable(100);
 			}
 		});
 		
@@ -221,7 +149,7 @@ public class DrawsPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				refreshCustomCountEnabled();
-				refrashTable(1000);
+				refreshTable(1000);
 			}
 		});
 		
@@ -231,7 +159,7 @@ public class DrawsPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				refreshCustomCountEnabled();
-				refrashTable(-1);
+				refreshTable(-1);
 			}
 		});
 		
@@ -249,7 +177,7 @@ public class DrawsPanel extends JPanel {
 		customCountButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				refrashTable((Integer) customCountSpinner.getValue());
+				refreshTable((Integer) customCountSpinner.getValue());
 			}
 		});
 		
@@ -307,18 +235,19 @@ public class DrawsPanel extends JPanel {
 		drawCountSelectionPanel.add(box);
 	}
 	
-	private void refrashTable(final int count) {
+	private void refreshTable(final int count) {
 		setPanelEnabled(false);
 		drawCount = count;
+		final List<NumberState> numberStates = ticketPanel.getNumberStates();
 		
 		new SwingWorker<Void, Void>() {
 			List<Draw> draws;
 			@Override
 			protected Void doInBackground() throws Exception {
 				if (count <= 0) {
-					draws = service.listDraws(ticketPanel.getNumberStates());
+					draws = service.listDraws(numberStates);
 				} else {
-					draws = service.listMostRecentDraws(count, ticketPanel.getNumberStates());
+					draws = service.listMostRecentDraws(count, numberStates);
 				}
 				return null;
 			}
@@ -327,9 +256,9 @@ public class DrawsPanel extends JPanel {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						drawTableModel.setDraws(draws);
+						drawTablePanel.setDraws(draws, numberStates);
 						drawCountLabel.setText(MessageFormat.format(
-								drawCountFormat, drawTable.getModel().getRowCount()));
+								drawCountFormat, drawTablePanel.getDrawCount()));
 						setPanelEnabled(true);
 					}
 				});
@@ -348,7 +277,7 @@ public class DrawsPanel extends JPanel {
 		ticketPanel.setEnabled(enabled);
 		clearTicket.setEnabled(enabled);
 		filterTicket.setEnabled(enabled);
-		drawTable.setEnabled(enabled);
+		drawTablePanel.setEnabled(enabled);
 		mainWindow.setEnabled(enabled);
 	}
 	
