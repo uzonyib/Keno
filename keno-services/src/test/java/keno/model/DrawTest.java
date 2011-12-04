@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import org.junit.Test;
 public class DrawTest {
 	
 	private Draw draw;
-	private List<NumberState> numberStates;
+	private Collection<Byte> requiredNumbers;
 
 	@Before
 	public void init() {
@@ -24,10 +24,7 @@ public class DrawTest {
 				36, 37, 47, 52, 54,
 				56, 63, 70, 71, 73 });
 		
-		numberStates = new ArrayList<NumberState>();
-		for (int i = 0; i < 80; ++i) {
-			numberStates.add(NumberState.ANY);
-		}
+		requiredNumbers = new ArrayList<Byte>();
 	}
 	
 	@Test
@@ -40,20 +37,29 @@ public class DrawTest {
 		assertFalse(draw.hasNumber((byte) 1));
 		assertFalse(draw.hasNumber((byte) 14));
 		assertFalse(draw.hasNumber((byte) 26));
-		assertFalse(draw.hasNumber((byte) 75));
-		
+		assertFalse(draw.hasNumber((byte) 75));		
+	}
+	
+	@Test
+	public void testGetHitCount() {
 		assertEquals(0, draw.getHitCount(null));
-		assertEquals(0, draw.getHitCount(numberStates));
-		numberStates.set(1, NumberState.SELECTED);
-		assertEquals(0, draw.getHitCount(numberStates));
-		numberStates.set(2, NumberState.UNSELECTED);
-		assertEquals(0, draw.getHitCount(numberStates));
-		numberStates.set(13, NumberState.SELECTED);
-		assertEquals(1, draw.getHitCount(numberStates));
-		numberStates.set(15, NumberState.UNSELECTED);
-		assertEquals(1, draw.getHitCount(numberStates));
-		numberStates.set(63, NumberState.SELECTED);
-		assertEquals(2, draw.getHitCount(numberStates));
+		assertEquals(0, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add(null);
+		assertEquals(0, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 1);
+		assertEquals(0, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 2);
+		assertEquals(0, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 13);
+		assertEquals(1, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 15);
+		assertEquals(2, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 32);
+		assertEquals(2, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 63);
+		assertEquals(3, draw.getHitCount(requiredNumbers));
+		requiredNumbers.add((byte) 64);
+		assertEquals(3, draw.getHitCount(requiredNumbers));
 	}
 
 }

@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import keno.model.Draw;
-import keno.model.NumberState;
 import keno.service.LotteryService;
 import keno.util.parser.DrawFileReader;
 
@@ -40,13 +39,13 @@ public class FileLotteryService implements LotteryService {
 	}
 
 	@Override
-	public List<Draw> listMostRecentDraws(int count, List<NumberState> filter) {
-		return listMostRecentDraws(count, filter, null);
+	public List<Draw> listMostRecentDraws(int count, Collection<Byte> winnerNumbers) {
+		return listMostRecentDraws(count, winnerNumbers, null);
 	}
 	
 	@Override
-	public List<Draw> listMostRecentDraws(int count, List<NumberState> filter,
-			Set<Integer> hitCounts) {
+	public List<Draw> listMostRecentDraws(int count, Collection<Byte> winnerNumbers,
+			Collection<Byte> hitCounts) {
 		FileReader fr = null;
 		try {
 			fr = new FileReader(source);
@@ -58,8 +57,13 @@ public class FileLotteryService implements LotteryService {
 				for (int i= 0; i < count; ++i) {
 					Draw draw = reader.readNext();
 					if (draw != null) {
-						if ((hitCounts == null && filter(draw, filter)) ||
-								(hitCounts != null && hitCounts.contains(draw.getHitCount(filter)))) {
+						if (winnerNumbers != null && !winnerNumbers.isEmpty()) {
+							if (hitCounts == null) {
+								draws.add(draw);
+							} else if (hitCounts.contains(draw.getHitCount(winnerNumbers))){
+								draws.add(draw);
+							}
+						} else {
 							draws.add(draw);
 						}
 					} else {
@@ -69,12 +73,21 @@ public class FileLotteryService implements LotteryService {
 			} else {
 				Draw draw = null;
 				while ((draw = reader.readNext()) != null) {
-					if ((hitCounts == null && filter(draw, filter)) ||
-							(hitCounts != null && hitCounts.contains(draw.getHitCount(filter)))) {
-						draws.add(draw);
+					if (draw != null) {
+						if (winnerNumbers != null && !winnerNumbers.isEmpty()) {
+							if (hitCounts == null) {
+								draws.add(draw);
+							} else if (hitCounts.contains(draw.getHitCount(winnerNumbers))){
+								draws.add(draw);
+							}
+						} else {
+							draws.add(draw);
+						}
 					}
 				}
 			}
+			LOGGER.info("Count: " + count + ", required: " + winnerNumbers + ", hits: " + hitCounts
+					+ ". Result count: " + draws.size());
 			return draws;
 		} catch (IOException e) {
 			LOGGER.error("I/O error while processing file: " + source.getAbsolutePath());
@@ -89,23 +102,6 @@ public class FileLotteryService implements LotteryService {
 			}
 		}
 	}
-	
-	private static boolean filter(Draw draw, List<NumberState> filter) {
-		if (filter == null) {
-			return true;
-		}
-		
-		for (int i = 0; i < filter.size(); ++i) {
-			if (filter.get(i) == NumberState.SELECTED
-					&& !draw.hasNumber((byte) (i + 1))) {
-				return false;
-			} else if (filter.get(i) == NumberState.UNSELECTED
-					&& draw.hasNumber((byte) (i + 1))) {
-				return false;
-			}
-		}
-		return true;
-	}
 
 	@Override
 	public List<Draw> listMostRecentDraws() {
@@ -113,14 +109,14 @@ public class FileLotteryService implements LotteryService {
 	}
 	
 	@Override
-	public List<Draw> listMostRecentDraws(List<NumberState> filter) {
-		return listMostRecentDraws(-1, filter, null);
+	public List<Draw> listMostRecentDraws(Collection<Byte> winnerNumbers) {
+		return listMostRecentDraws(-1, winnerNumbers, null);
 	}
 	
 	@Override
-	public List<Draw> listMostRecentDraws(List<NumberState> filter,
-			Set<Integer> hitCounts) {
-		return listMostRecentDraws(-1, filter, hitCounts);
+	public List<Draw> listMostRecentDraws(Collection<Byte> winnerNumbers,
+			Collection<Byte> hitCounts) {
+		return listMostRecentDraws(-1, winnerNumbers, hitCounts);
 	}
 
 }

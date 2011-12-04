@@ -1,10 +1,9 @@
 package keno.service;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import keno.model.Draw;
-import keno.model.NumberState;
 
 public interface LotteryService {
 	
@@ -12,16 +11,16 @@ public interface LotteryService {
 	
 	List<Draw> listMostRecentDraws(int count);
 	
-	List<Draw> listMostRecentDraws(int count, List<NumberState> filter);
+	List<Draw> listMostRecentDraws(int count, Collection<Byte> winnerNumbers);
 	
-	List<Draw> listMostRecentDraws(int count, List<NumberState> filter,
-			Set<Integer> hitCounts);
+	List<Draw> listMostRecentDraws(int count, Collection<Byte> winnerNumbers,
+			Collection<Byte> hitCounts);
 	
 	List<Draw> listMostRecentDraws();
 	
-	List<Draw> listMostRecentDraws(List<NumberState> filter);
+	List<Draw> listMostRecentDraws(Collection<Byte> winnerNumbers);
 	
-	List<Draw> listMostRecentDraws(List<NumberState> filter,
-			Set<Integer> hitCounts);
+	List<Draw> listMostRecentDraws(Collection<Byte> winnerNumbers,
+			Collection<Byte> hitCounts);
 
 }

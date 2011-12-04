@@ -1,7 +1,7 @@
 package keno.model;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 public class Draw {
 	
@@ -30,19 +30,18 @@ public class Draw {
 		return false;
 	}
 	
-	public int getHitCount(List<NumberState> numberStates) {
-		if (numberStates == null) {
+	public byte getHitCount(Collection<Byte> numbers) {
+		if (numbers == null) {
 			return 0;
 		}
 		
-		int hitCount = 0;
-		for (int i = 0; i < numberStates.size(); ++i) {
-			if (numberStates.get(i) == NumberState.SELECTED
-				&& hasNumber((byte) (i + 1))) {
+		byte hitCount = 0;
+		for (Byte number : numbers) {
+			if (number != null && hasNumber(number)) {
 				++hitCount;
 			}
 		}
-		System.out.println(hitCount);
+		
 		return hitCount;
 	}
 

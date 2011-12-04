@@ -75,7 +75,7 @@ public final class KenoApp {
 		Properties properties = initProperties(PROPERTY_FILE);
 		ResourceBundle resourceBundle = initResourceBundle(KENO_GUI_RB_BASE);
 		if (properties == null || resourceBundle == null) {
-			System.out.println("Failed to initialize resources.");
+			LOGGER.error("Failed to initialize resources.");
 			return;
 		}
 		
