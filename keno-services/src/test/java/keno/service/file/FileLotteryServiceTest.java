@@ -8,7 +8,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import keno.model.Draw;
 import keno.model.NumberState;
@@ -128,6 +130,42 @@ public class FileLotteryServiceTest {
 		
 		numberStates.set(0, NumberState.ANY);
 		numberStates.set(1, NumberState.ANY);
+
+		Set<Integer> hitCounts = new HashSet<Integer>();
+		hitCounts.add(1);
+		
+		numberStates.set(0, NumberState.SELECTED);
+		draws = service.listMostRecentDraws(10, numberStates, hitCounts);
+		assertNotNull(draws);
+		assertEquals(3, draws.size());
+		assertEquals("2011-11-04", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-10-31", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-10-28", dateFormat.format(draws.get(2).getDate()));
+		
+		numberStates.set(0, NumberState.UNSELECTED);
+		draws = service.listMostRecentDraws(10, numberStates, hitCounts);
+		assertNotNull(draws);
+		assertTrue(draws.isEmpty());
+		
+		hitCounts.add(2);
+		numberStates.set(0, NumberState.SELECTED);
+		numberStates.set(2, NumberState.SELECTED);
+		draws = service.listMostRecentDraws(numberStates, hitCounts);
+		assertNotNull(draws);
+		assertEquals(3, draws.size());
+		assertEquals("2011-11-04", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-10-31", dateFormat.format(draws.get(1).getDate()));
+		assertEquals("2011-10-28", dateFormat.format(draws.get(2).getDate()));
+
+		hitCounts.remove(1);
+		draws = service.listMostRecentDraws(10, numberStates, hitCounts);
+		assertNotNull(draws);
+		assertEquals(2, draws.size());
+		assertEquals("2011-11-04", dateFormat.format(draws.get(0).getDate()));
+		assertEquals("2011-10-31", dateFormat.format(draws.get(1).getDate()));
+		
+		numberStates.set(0, NumberState.ANY);
+		numberStates.set(2, NumberState.ANY);
 	}
 	
 	@Test

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import keno.model.Draw;
 import keno.model.NumberState;
@@ -14,7 +15,6 @@ import keno.util.parser.DrawFileReader;
 
 import org.apache.log4j.Logger;
 
-// TODO unit test
 public class FileLotteryService implements LotteryService {
 
 	private static final Logger LOGGER = Logger.getLogger(FileLotteryService.class);
@@ -27,7 +27,7 @@ public class FileLotteryService implements LotteryService {
 
 	@Override
 	public Draw getMostRecentDraw() {
-		List<Draw> list = listMostRecentDraws(1);
+		List<Draw> list = listMostRecentDraws(1, null, null);
 		if (list.isEmpty()) {
 			return null;
 		}
@@ -36,11 +36,17 @@ public class FileLotteryService implements LotteryService {
 	
 	@Override
 	public List<Draw> listMostRecentDraws(int count) {
-		return listMostRecentDraws(count, null);
+		return listMostRecentDraws(count, null, null);
 	}
 
 	@Override
 	public List<Draw> listMostRecentDraws(int count, List<NumberState> filter) {
+		return listMostRecentDraws(count, filter, null);
+	}
+	
+	@Override
+	public List<Draw> listMostRecentDraws(int count, List<NumberState> filter,
+			Set<Integer> hitCounts) {
 		FileReader fr = null;
 		try {
 			fr = new FileReader(source);
@@ -52,7 +58,8 @@ public class FileLotteryService implements LotteryService {
 				for (int i= 0; i < count; ++i) {
 					Draw draw = reader.readNext();
 					if (draw != null) {
-						if (filter(draw, filter)) {
+						if ((hitCounts == null && filter(draw, filter)) ||
+								(hitCounts != null && hitCounts.contains(draw.getHitCount(filter)))) {
 							draws.add(draw);
 						}
 					} else {
@@ -62,7 +69,8 @@ public class FileLotteryService implements LotteryService {
 			} else {
 				Draw draw = null;
 				while ((draw = reader.readNext()) != null) {
-					if (filter(draw, filter)) {
+					if ((hitCounts == null && filter(draw, filter)) ||
+							(hitCounts != null && hitCounts.contains(draw.getHitCount(filter)))) {
 						draws.add(draw);
 					}
 				}
@@ -101,12 +109,18 @@ public class FileLotteryService implements LotteryService {
 
 	@Override
 	public List<Draw> listMostRecentDraws() {
-		return listMostRecentDraws(-1);
+		return listMostRecentDraws(-1, null, null);
 	}
 	
 	@Override
 	public List<Draw> listMostRecentDraws(List<NumberState> filter) {
-		return listMostRecentDraws(-1, filter);
+		return listMostRecentDraws(-1, filter, null);
+	}
+	
+	@Override
+	public List<Draw> listMostRecentDraws(List<NumberState> filter,
+			Set<Integer> hitCounts) {
+		return listMostRecentDraws(-1, filter, hitCounts);
 	}
 
 }

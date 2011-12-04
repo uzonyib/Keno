@@ -1,6 +1,7 @@
 package keno.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class Draw {
 	
@@ -27,6 +28,22 @@ public class Draw {
 			}
 		}
 		return false;
+	}
+	
+	public int getHitCount(List<NumberState> numberStates) {
+		if (numberStates == null) {
+			return 0;
+		}
+		
+		int hitCount = 0;
+		for (int i = 0; i < numberStates.size(); ++i) {
+			if (numberStates.get(i) == NumberState.SELECTED
+				&& hasNumber((byte) (i + 1))) {
+				++hitCount;
+			}
+		}
+		System.out.println(hitCount);
+		return hitCount;
 	}
 
 	public short getYear() {
