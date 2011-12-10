@@ -13,6 +13,7 @@ import java.util.ResourceBundle;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import keno.KenoApp;
@@ -73,7 +74,7 @@ public class TicketPanel extends JPanel {
 		public void toggle() {
 			switch (state) {
 			case ANY:
-				if (ticketPanel.getSelectedCount() < MAX_SELECTIONS) {
+				if (ticketPanel.buttonSelectionAllowed()) {
 					setState(NumberState.SELECTED);
 				}
 				break;
@@ -111,17 +112,26 @@ public class TicketPanel extends JPanel {
 	
 	private static final String TICKET_HIT_COUNT_KEY = "draws.ticket.hitcount";
 	private static final String TICKET_CLEAR_KEY = "draws.ticket.clear";
+	private static final String TICKET_SELECTED_COUNT_KEY = "draws.ticket.selectedcount";
 	
-	private static final int MAX_SELECTIONS = 10;
+	private static final String MAXIMUM_NUMBERS_KEY = "keno.maxnumbers";
+	private static final String MAXIMUM_HITS_KEY = "keno.maxhits";
+	private static final String MINIMUM_HITS_KEY_PREFIX = "keno.minhits.";
+	
+	private ResourceBundle bundle;
+	private byte maxNumbers;
+	private byte maxHits;
+	private byte minNumbersForZeroHits;
 	
 	private DrawsPanel drawsPanel;
 	
 	private JPanel buttonPanel;
 	private Box buttonBox;
-	private Box hitCountBox;
+	private Box checkBoxPanel;
 	
 	private List<TicketButton> buttons;
 	private List<HitCheckBox> checkBoxes;
+	private JLabel selectionInfo;
 	private JButton clearTicket;
 	
 	private String checkBoxLabel;
@@ -133,8 +143,12 @@ public class TicketPanel extends JPanel {
 	
 	private void init() {
 		KenoApp app = KenoApp.getInstance();
-		ResourceBundle bundle = app.getResourceBundle();
+		bundle = app.getResourceBundle();
 		checkBoxLabel = bundle.getString(TICKET_HIT_COUNT_KEY);
+		maxNumbers = Byte.valueOf(bundle.getString(MAXIMUM_NUMBERS_KEY));
+		maxHits = Byte.valueOf(bundle.getString(MAXIMUM_HITS_KEY));
+		minNumbersForZeroHits = Byte.valueOf(bundle.getString(
+				MINIMUM_HITS_KEY_PREFIX + "0"));
 		
 		TicketButton.defaultColor = Color.decode(bundle.getString(COLOR_DEFAULT_KEY));
 		TicketButton.selectedColor = Color.decode(bundle.getString(COLOR_SELECTED_KEY));
@@ -154,6 +168,9 @@ public class TicketPanel extends JPanel {
 		buttonBox.add(buttonPanel);
 		buttonBox.add(Box.createHorizontalGlue());
 		
+		selectionInfo = new JLabel(MessageFormat.format(
+				bundle.getString(TICKET_SELECTED_COUNT_KEY), 0));
+		
 		clearTicket = new JButton(bundle.getString(TICKET_CLEAR_KEY));
 		clearTicket.addActionListener(new ActionListener() {
 			@Override
@@ -163,12 +180,20 @@ public class TicketPanel extends JPanel {
 			}
 		});
 		
-		checkBoxes = new ArrayList<TicketPanel.HitCheckBox>();
-		hitCountBox = Box.createVerticalBox();
-		hitCountBox.add(clearTicket);
+		checkBoxes = new ArrayList<TicketPanel.HitCheckBox>();		
+		Box infoBox = Box.createHorizontalBox();
+		infoBox.add(clearTicket);
+		infoBox.add(Box.createHorizontalStrut(10));
+		infoBox.add(selectionInfo);
+		checkBoxPanel = Box.createHorizontalBox();
+		
+		Box hitCountBox = Box.createVerticalBox();
+		hitCountBox.add(infoBox);
+		hitCountBox.add(checkBoxPanel);
 		
 		Box box = Box.createHorizontalBox();
 		box.add(buttonBox);
+		box.add(Box.createHorizontalStrut(20));
 		box.add(hitCountBox);
 		
 		add(box);
@@ -202,8 +227,8 @@ public class TicketPanel extends JPanel {
 		clearTicket.setEnabled(enabled);
 	}
 	
-	private int getSelectedCount() {
-		int maxHitCount = 0;
+	private byte getSelectedCount() {
+		byte maxHitCount = 0;
 		for (TicketButton button : buttons) {
 			if (button.getState() == NumberState.SELECTED) {
 				++maxHitCount;
@@ -212,67 +237,50 @@ public class TicketPanel extends JPanel {
 		return maxHitCount;
 	}
 	
+	private boolean buttonSelectionAllowed() {
+		return getSelectedCount() < maxNumbers;
+	}
+	
 	private void refresh() {
+		
 		checkBoxes = new ArrayList<TicketPanel.HitCheckBox>();
-		switch (getSelectedCount()) {
-		case 1:
-			checkBoxes.add(createHitCheckBox((byte) 1, true));
-			break;
-		case 2:
-			checkBoxes.add(createHitCheckBox((byte) 2, true));
-			break;
-		case 3:
-			checkBoxes.add(createHitCheckBox((byte) 2));
-			checkBoxes.add(createHitCheckBox((byte) 3, true));
-			break;
-		case 4:
-			checkBoxes.add(createHitCheckBox((byte) 3));
-			checkBoxes.add(createHitCheckBox((byte) 4, true));
-			break;
-		case 5:
-			checkBoxes.add(createHitCheckBox((byte) 3));
-			checkBoxes.add(createHitCheckBox((byte) 4));
-			checkBoxes.add(createHitCheckBox((byte) 5, true));
-			break;
-		case 6:
-			checkBoxes.add(createHitCheckBox((byte) 4));
-			checkBoxes.add(createHitCheckBox((byte) 5));
-			checkBoxes.add(createHitCheckBox((byte) 6, true));
-			break;
-		case 7:
-			checkBoxes.add(createHitCheckBox((byte) 4));
-			checkBoxes.add(createHitCheckBox((byte) 5));
-			checkBoxes.add(createHitCheckBox((byte) 6));
-			checkBoxes.add(createHitCheckBox((byte) 7, true));
-			break;
-		case 8:
-			checkBoxes.add(createHitCheckBox((byte) 5));
-			checkBoxes.add(createHitCheckBox((byte) 6));
-			checkBoxes.add(createHitCheckBox((byte) 7));
-			checkBoxes.add(createHitCheckBox((byte) 8, true));
-			break;
-		case 9:
-			checkBoxes.add(createHitCheckBox((byte) 5));
-			checkBoxes.add(createHitCheckBox((byte) 6));
-			checkBoxes.add(createHitCheckBox((byte) 7));
-			checkBoxes.add(createHitCheckBox((byte) 8));
-			checkBoxes.add(createHitCheckBox((byte) 9, true));
-			break;
-		case 10:
-			checkBoxes.add(createHitCheckBox((byte) 6));
-			checkBoxes.add(createHitCheckBox((byte) 7));
-			checkBoxes.add(createHitCheckBox((byte) 8));
-			checkBoxes.add(createHitCheckBox((byte) 9));
-			checkBoxes.add(createHitCheckBox((byte) 10, true));
-			break;
-		default:
-			break;
+		
+		byte max = getSelectedCount();
+		selectionInfo.setText(MessageFormat.format(
+				bundle.getString(TICKET_SELECTED_COUNT_KEY), max));
+		
+		if (max > maxHits) {
+			max = maxHits;
+		}
+		byte minHits = max > 0 ? Byte.valueOf(bundle.getString(
+				MINIMUM_HITS_KEY_PREFIX + max)) : 0;
+		
+		byte div = (byte) (maxHits / 2);
+		Box[] boxes = new Box[] { Box.createVerticalBox(),
+				Box.createVerticalBox() };
+		
+		if (max > 0 && max >= minNumbersForZeroHits) {
+			HitCheckBox hitCheckBox = createHitCheckBox((byte) 0);
+			checkBoxes.add(hitCheckBox);
+			boxes[0].add(hitCheckBox);
 		}
 		
-		hitCountBox.removeAll();
-		hitCountBox.add(clearTicket);
-		for (HitCheckBox hitCheckBox : checkBoxes) {
-			hitCountBox.add(hitCheckBox);
+		byte i = 1;
+		for (; i < minHits; ++i) {
+			HitCheckBox hitCheckBox = createHitCheckBox(i);
+			checkBoxes.add(hitCheckBox);
+			boxes[(i - 1) / div].add(hitCheckBox);
+		}
+		for (; i <= max; ++i) {
+			HitCheckBox hitCheckBox = createHitCheckBox(i, true);
+			checkBoxes.add(hitCheckBox);
+			boxes[(i - 1) / div].add(hitCheckBox);
+		}
+		
+		checkBoxPanel.removeAll();
+		for (Box box : boxes) {
+			box.add(Box.createVerticalGlue());
+			checkBoxPanel.add(box);
 		}
 		
 		validate();
