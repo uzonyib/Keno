@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -21,8 +22,10 @@ import javax.swing.SwingWorker;
 import keno.KenoApp;
 import keno.gui.MainWindow;
 import keno.gui.panel.draw.DrawTablePanel;
+import keno.gui.panel.draw.StatsPanel;
 import keno.model.Draw;
 import keno.service.LotteryService;
+import keno.util.stats.StatsUtil;
 
 public class DrawsPanel extends JPanel {
 
@@ -40,6 +43,9 @@ public class DrawsPanel extends JPanel {
 	
 	private static final String INFO_DRAW_COUNT_KEY = "draws.info.drawcount";
 	
+	private static final String NUMBERS_TAB_TITLE_KEY = "draws.numbers.tab.title";
+	private static final String STATS_TAB_TITLE_KEY = "draws.stats.tab.title";
+	
 	private int drawCount;
 	private boolean ticketVisible;
 	private String drawCountFormat;
@@ -47,10 +53,12 @@ public class DrawsPanel extends JPanel {
 	
 	private MainWindow mainWindow;
 	
+	private JTabbedPane tabPanel;
 	private JPanel drawCountSelectionPanel;
 	private TicketPanel ticketPanel;
 	private Box controlPanel;
 	private DrawTablePanel drawTablePanel;
+	private StatsPanel statsPanel;
 
 	private JRadioButton radio10;
 	private JRadioButton radio100;
@@ -77,6 +85,7 @@ public class DrawsPanel extends JPanel {
 		ResourceBundle bundle = app.getResourceBundle();
 		
 		drawTablePanel = new DrawTablePanel();
+		statsPanel = new StatsPanel();
 		
 		ticketPanel = new TicketPanel(this);
 		
@@ -89,8 +98,12 @@ public class DrawsPanel extends JPanel {
 		controlPanel = Box.createVerticalBox();
 		controlPanel.add(drawCountSelectionPanel);
 		
+		tabPanel = new JTabbedPane();
+		tabPanel.add(bundle.getString(NUMBERS_TAB_TITLE_KEY), drawTablePanel);
+		tabPanel.add(bundle.getString(STATS_TAB_TITLE_KEY), statsPanel);
+		
 		add(controlPanel, BorderLayout.NORTH);
-		add(drawTablePanel, BorderLayout.CENTER);
+		add(tabPanel, BorderLayout.CENTER);
 		add(drawCountLabel, BorderLayout.SOUTH);
 	}
 	
@@ -238,6 +251,7 @@ public class DrawsPanel extends JPanel {
 						drawTablePanel.setDraws(draws, selectedNumbers);
 						drawCountLabel.setText(MessageFormat.format(
 								drawCountFormat, drawTablePanel.getDrawCount()));
+						statsPanel.refreshTable(StatsUtil.getCounts(draws), selectedNumbers);
 						setPanelEnabled(true);
 					}
 				});
